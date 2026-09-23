@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | DMSTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="header">
+    <div class="brand">
+        <img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div>
+            <div class="brand-title">DMSTracker</div>
+            <div class="brand-subtitle">Track • Understand • Feel Better</div>
+        </div>
+    </div>
+
+    <!-- The logo is placed in the right corner, with login/logout directly below it. -->
+    <div class="header-right">
+        <img class="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div class="auth-links">
+            {% if session.get("user_id") %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main class="container auth-wrapper">
+    <section class="card auth-card">
+        <span class="badge">STEP 2 • LOGIN</span>
+        <h1>Welcome Back</h1>
+        <p class="muted">Login with your username or email to continue.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Username or Email</label>
+                <input type="text" name="username_or_email"
+                       placeholder="Enter username or email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password"
+                       placeholder="Enter password" required>
+            </div>
+
+            <button class="primary-btn" type="submit">Login →</button>
+        </form>
+
+        <div class="auth-footer">
+            New student?
+            <a href="{{ url_for('register') }}">Register here</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

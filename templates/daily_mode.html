@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Solution | DMSTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="header">
+    <div class="brand">
+        <img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div>
+            <div class="brand-title">DMSTracker</div>
+            <div class="brand-subtitle">Track • Understand • Feel Better</div>
+        </div>
+    </div>
+
+    <!-- The logo is placed in the right corner, with login/logout directly below it. -->
+    <div class="header-right">
+        <img class="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div class="auth-links">
+            {% if session.get("user_id") %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}">Daily Check-in</a>
+        <a href="{{ url_for('history') }}">History</a>
+        <a href="{{ url_for('response_page') }}">My Response</a>
+        <a href="{{ url_for('daily_mode') }}">Daily Solution</a>
+        <a href="{{ url_for('sensor') }}">Sensors</a>
+        <a href="{{ url_for('assistant') }}">AI Assistant</a>
+        <a href="{{ url_for('account') }}">Account</a>
+    </nav>
+
+    <section class="hero">
+        <span class="badge">DAILY SOLUTION MODE</span>
+        <h1>Today's Small Action Plan 🌱</h1>
+        <p>Simple actions based on your latest check-in.</p>
+    </section>
+
+    <section class="card">
+        {% if latest %}
+            <h2>Based on your latest check-in</h2>
+            <p class="muted">
+                Mood: <strong>{{ latest["mood"] }}/5</strong> |
+                Stress: <strong>{{ latest["stress"] }}/5</strong>
+            </p>
+            <br>
+        {% endif %}
+
+        <ul class="daily-list">
+            {% for step in daily_steps %}
+                <li>{{ step }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+</main>
+</body>
+</html>

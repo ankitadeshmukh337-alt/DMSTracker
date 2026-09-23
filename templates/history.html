@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History | DMSTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="header">
+    <div class="brand">
+        <img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div>
+            <div class="brand-title">DMSTracker</div>
+            <div class="brand-subtitle">Track • Understand • Feel Better</div>
+        </div>
+    </div>
+    <div class="header-right">
+        <img class="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div class="auth-links">
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}">Daily Check-in</a>
+        <a href="{{ url_for('history') }}">History</a>
+        <a href="{{ url_for('response_page') }}">My Response</a>
+        <a href="{{ url_for('daily_mode') }}">Daily Solution</a>
+        <a href="{{ url_for('sensor') }}">Sensors</a>
+        <a href="{{ url_for('assistant') }}">AI Assistant</a>
+        <a href="{{ url_for('account') }}">Account</a>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <section class="hero">
+        <span class="badge">PERSONAL HISTORY</span>
+        <h1>Your Check-in History</h1>
+        <p>Only your own records are shown here.</p>
+    </section>
+
+    <section class="card">
+        <div class="action-row">
+            <a class="secondary-btn" href="{{ url_for('export_data') }}">Export My Data</a>
+
+            <form method="POST" action="{{ url_for('clear_history') }}"
+                  onsubmit="return confirm('Delete all of your check-in and assistant history? This cannot be undone.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="danger-btn" type="submit">Delete All History</button>
+            </form>
+        </div>
+
+        {% if records %}
+            {% for record in records %}
+                <article class="history-item">
+                    <div class="history-meta">
+                        <span>{{ record["checkin_date"] }}</span>
+                        <span>Mood {{ record["mood"] }}/5 • Stress {{ record["stress"] }}/5</span>
+                    </div>
+
+                    {% if record["note"] %}
+                        <p><strong>Note:</strong> {{ record["note"] }}</p>
+                    {% endif %}
+
+                    <p class="muted"><strong>Response:</strong> {{ record["advice"] }}</p>
+
+                    <form method="POST"
+                          action="{{ url_for('delete_checkin', checkin_id=record['id']) }}"
+                          onsubmit="return confirm('Delete this check-in?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="small-danger" type="submit">Delete This Entry</button>
+                    </form>
+                </article>
+            {% endfor %}
+        {% else %}
+            <p class="muted">No check-in history yet.</p>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

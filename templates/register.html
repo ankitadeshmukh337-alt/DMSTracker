@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | DMSTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="header">
+    <div class="brand">
+        <img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div>
+            <div class="brand-title">DMSTracker</div>
+            <div class="brand-subtitle">Track • Understand • Feel Better</div>
+        </div>
+    </div>
+
+    <!-- The logo is placed in the right corner, with login/logout directly below it. -->
+    <div class="header-right">
+        <img class="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div class="auth-links">
+            {% if session.get("user_id") %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main class="container auth-wrapper">
+    <section class="card auth-card">
+        <span class="badge">STEP 1 • CREATE ACCOUNT</span>
+        <h1>Register</h1>
+        <p class="muted">Create your student account before using DMSTracker.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Choose a username" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="student@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Minimum 6 characters" required>
+            </div>
+
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" placeholder="Re-enter password" required>
+            </div>
+
+            <button class="primary-btn" type="submit">Create Account →</button>
+        </form>
+
+        <div class="auth-footer">
+            Already registered?
+            <a href="{{ url_for('login') }}">Login here</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

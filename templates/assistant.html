@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant | DMSTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="header">
+    <div class="brand">
+        <img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div>
+            <div class="brand-title">DMSTracker</div>
+            <div class="brand-subtitle">Track • Understand • Feel Better</div>
+        </div>
+    </div>
+
+    <!-- The logo is placed in the right corner, with login/logout directly below it. -->
+    <div class="header-right">
+        <img class="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div class="auth-links">
+            {% if session.get("user_id") %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}">Daily Check-in</a>
+        <a href="{{ url_for('history') }}">History</a>
+        <a href="{{ url_for('response_page') }}">My Response</a>
+        <a href="{{ url_for('daily_mode') }}">Daily Solution</a>
+        <a href="{{ url_for('sensor') }}">Sensors</a>
+        <a href="{{ url_for('assistant') }}">AI Assistant</a>
+        <a href="{{ url_for('account') }}">Account</a>
+    </nav>
+
+    <section class="hero">
+        <span class="badge">FRIENDLY AI ASSISTANT</span>
+        <h1>Talk to DMSTracker AI 🤖💚</h1>
+        <p>
+            Share what is bothering you. The assistant uses your latest
+            check-in to provide simple supportive suggestions.
+        </p>
+    </section>
+
+    <section class="card">
+        <div class="chat">
+            {% if messages %}
+                {% for item in messages %}
+                    <div class="message {{ item['sender'] }}">
+                        <strong>
+                            {% if item['sender'] == 'assistant' %}
+                                DMSTracker AI
+                            {% else %}
+                                You
+                            {% endif %}
+                        </strong>
+                        <br>
+                        {{ item["message"] }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="message assistant">
+                    <strong>DMSTracker AI</strong><br>
+                    Hi! 🌿 Tell me how you are feeling today. I am here to listen.
+                </div>
+            {% endif %}
+        </div>
+
+        <form class="chat-form" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" name="message"
+                   placeholder="Example: I am stressed about exams..."
+                   required>
+            <button class="primary-btn" type="submit">Send</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensors | DMSTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="header">
+    <div class="brand">
+        <img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div>
+            <div class="brand-title">DMSTracker</div>
+            <div class="brand-subtitle">Track • Understand • Feel Better</div>
+        </div>
+    </div>
+    <div class="header-right">
+        <img class="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div class="auth-links">
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}">Daily Check-in</a>
+        <a href="{{ url_for('history') }}">History</a>
+        <a href="{{ url_for('response_page') }}">My Response</a>
+        <a href="{{ url_for('daily_mode') }}">Daily Solution</a>
+        <a href="{{ url_for('sensor') }}">Sensors</a>
+        <a href="{{ url_for('assistant') }}">AI Assistant</a>
+        <a href="{{ url_for('account') }}">Account</a>
+    </nav>
+
+    <section class="hero">
+        <span class="badge">IOT SENSOR MONITOR</span>
+        <h1>Sensor Data 📡</h1>
+        <p>Readings received from ESP32 or the Java test client.</p>
+    </section>
+
+    <section class="card">
+        <h2>Recent Readings</h2>
+        {% if readings %}
+            <div class="history-grid">
+            {% for item in readings %}
+                <article class="history-item">
+                    <p><strong>❤️ Heart Rate:</strong> {{ item["heart_rate"] if item["heart_rate"] is not none else "-" }} BPM</p>
+                    <p><strong>🫁 SpO₂:</strong> {{ item["spo2"] if item["spo2"] is not none else "-" }} %</p>
+                    <p><strong>🌡 Temperature:</strong> {{ item["temperature"] if item["temperature"] is not none else "-" }} °C</p>
+                    <p class="muted">{{ item["created_at"] }}</p>
+                </article>
+            {% endfor %}
+            </div>
+        {% else %}
+            <p class="muted">No sensor readings received yet.</p>
+        {% endif %}
+    </section>
+
+    <section class="card sensor-control-card">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">HARDWARE-FREE DEMO</span>
+                <h2>Sensor Simulator</h2>
+            </div>
+            <span class="section-icon">📡</span>
+        </div>
+
+        <p class="muted">
+            No physical hardware is required for this prototype. Generate changing
+            demo readings to validate the complete sensor-data pipeline.
+        </p>
+
+        <form id="simulateSensorForm">
+            <input type="hidden" id="simulateCsrfToken" value="{{ csrf_token() }}">
+            <button class="primary-btn" type="submit">Generate New Sensor Reading</button>
+        </form>
+
+        <div id="simulateResult" class="sensor-test-result" aria-live="polite"></div>
+        <p class="muted">Software simulation only — values are not real medical measurements.</p>
+    </section>
+
+    <section class="card sensor-control-card">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">SOFTWARE TEST MODE</span>
+                <h2>Test Sensor Connection</h2>
+            </div>
+            <span class="section-icon">🧪</span>
+        </div>
+
+        <p class="muted">
+            Use this button to verify the complete DMSTracker sensor pipeline before
+            connecting an ESP32 or physical sensors.
+        </p>
+
+        <form id="sensorTestForm">
+            <input type="hidden" id="csrfToken" value="{{ csrf_token() }}">
+            <button class="primary-btn" type="submit">Send Demo Sensor Reading</button>
+        </form>
+
+        <div id="sensorTestResult" class="sensor-test-result" aria-live="polite"></div>
+        <p class="muted">Demo values: Heart Rate 72 BPM • SpO₂ 98% • Temperature 36.7 °C</p>
+    </section>
+
+    <section class="card">
+        <h2>Project Hardware</h2>
+        <p>Use the Java client for software testing and the ESP32 sketch for hardware testing.</p>
+        <p class="muted">These readings are for an educational project and are not medical diagnoses.</p>
+    </section>
+</main>
+
+<script>
+document.getElementById("sensorTestForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const result = document.getElementById("sensorTestResult");
+    const token = document.getElementById("csrfToken").value;
+
+    result.textContent = "Sending demo sensor reading...";
+
+    try {
+        const response = await fetch("{{ url_for('sensor_test') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: new URLSearchParams({csrf_token: token})
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            result.textContent =
+                "✓ Reading received: " +
+                data.heart_rate + " BPM • " +
+                data.spo2 + "% SpO₂ • " +
+                data.temperature + " °C";
+
+            setTimeout(() => window.location.reload(), 700);
+        } else {
+            result.textContent = "✕ " + (data.message || "Sensor test failed.");
+        }
+    } catch (error) {
+        result.textContent = "✕ Could not reach the Flask server. Keep python app.py running.";
+    }
+});
+</script>
+
+
+<script>
+document.getElementById("simulateSensorForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const result = document.getElementById("simulateResult");
+    const token = document.getElementById("simulateCsrfToken").value;
+    result.textContent = "Generating sensor reading...";
+
+    try {
+        const response = await fetch("{{ url_for('simulate_sensor') }}", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: new URLSearchParams({csrf_token: token})
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            result.textContent =
+                "✓ New reading: " + data.heart_rate + " BPM • " +
+                data.spo2 + "% SpO₂ • " + data.temperature + " °C";
+            setTimeout(() => window.location.reload(), 700);
+        } else {
+            result.textContent = "✕ " + (data.message || "Simulation failed.");
+        }
+    } catch (error) {
+        result.textContent = "✕ Server connection failed. Keep python app.py running.";
+    }
+});
+</script>
+
+</body>
+</html>

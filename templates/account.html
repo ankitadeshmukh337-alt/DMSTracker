@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account & Privacy | DMSTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="header">
+    <div class="brand">
+        <img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div>
+            <div class="brand-title">DMSTracker</div>
+            <div class="brand-subtitle">Track • Understand • Feel Better</div>
+        </div>
+    </div>
+
+    <div class="header-right">
+        <img class="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div class="auth-links">
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}">Daily Check-in</a>
+        <a href="{{ url_for('history') }}">History</a>
+        <a href="{{ url_for('response_page') }}">My Response</a>
+        <a href="{{ url_for('daily_mode') }}">Daily Solution</a>
+        <a href="{{ url_for('sensor') }}">Sensors</a>
+        <a href="{{ url_for('assistant') }}">AI Assistant</a>
+        <a href="{{ url_for('account') }}">Account</a>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <section class="hero">
+        <span class="badge">ACCOUNT & PRIVACY</span>
+        <h1>Your Data, Your Control 🔐</h1>
+        <p>Review your account information and permanently remove your DMSTracker data when you choose.</p>
+    </section>
+
+    <section class="card">
+        <h2>Account Information</h2>
+        <p><strong>Username:</strong> {{ user["username"] }}</p>
+        <p><strong>Email:</strong> {{ user["email"] }}</p>
+        <p><strong>Registered:</strong> {{ user["created_at"] }}</p>
+        <p><strong>Saved check-ins:</strong> {{ checkin_count }}</p>
+        <p><strong>Assistant messages:</strong> {{ assistant_count }}</p>
+    </section>
+
+    <section class="card">
+        <h2>Privacy & Security</h2>
+        <ul class="daily-list">
+            <li>🔒 Passwords are stored as secure password hashes, not plain text.</li>
+            <li>🔒 Database queries use parameters to reduce SQL-injection risk.</li>
+            <li>🔒 Students can access only records belonging to their own account.</li>
+            <li>🗑️ Deleting your account also deletes your check-ins and assistant history.</li>
+            <li>🚪 Logout clears the current login session.</li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <h2>Sensor Device Connection 📡</h2>
+        <p>Generate a private device token for the Java test client or ESP32. Your account password is never placed inside the device code.</p>
+
+        {% if new_device_token %}
+            <div class="flash success">
+                <strong>New token — copy it now:</strong><br>
+                <code style="word-break: break-all;">{{ new_device_token }}</code>
+            </div>
+        {% endif %}
+
+        {% if device %}
+            <p class="muted">A sensor device token is currently active. Generate a new one if you need to replace it.</p>
+        {% else %}
+            <p class="muted">No sensor device token has been created yet.</p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('generate_device_token') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Generate / Replace Sensor Token</button>
+        </form>
+    </section>
+
+    <section class="card danger-card">
+        <h2>Delete Account</h2>
+        <p class="muted">
+            This permanently deletes your account, mood/stress check-ins, and
+            stored AI assistant conversations. This action cannot be undone.
+        </p>
+
+        <form method="POST" action="{{ url_for('delete_account') }}"
+              onsubmit="return confirm('PERMANENTLY DELETE your account and all related data?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Type DELETE to confirm</label>
+                <input type="text" name="confirmation"
+                       placeholder="DELETE" required>
+            </div>
+
+            <button class="danger-btn" type="submit">
+                Permanently Delete My Account
+            </button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

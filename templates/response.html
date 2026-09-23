@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Response | DMSTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="header">
+    <div class="brand">
+        <img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div>
+            <div class="brand-title">DMSTracker</div>
+            <div class="brand-subtitle">Track • Understand • Feel Better</div>
+        </div>
+    </div>
+
+    <!-- The logo is placed in the right corner, with login/logout directly below it. -->
+    <div class="header-right">
+        <img class="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="DMSTracker logo">
+        <div class="auth-links">
+            {% if session.get("user_id") %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}">Daily Check-in</a>
+        <a href="{{ url_for('history') }}">History</a>
+        <a href="{{ url_for('response_page') }}">My Response</a>
+        <a href="{{ url_for('daily_mode') }}">Daily Solution</a>
+        <a href="{{ url_for('sensor') }}">Sensors</a>
+        <a href="{{ url_for('assistant') }}">AI Assistant</a>
+        <a href="{{ url_for('account') }}">Account</a>
+    </nav>
+
+    <section class="hero">
+        <span class="badge">YOUR RESPONSE</span>
+        <h1>A little guidance for today 💚</h1>
+        <p>This response is generated from your latest mood and stress check-in.</p>
+    </section>
+
+    {% if latest %}
+        <section class="card">
+            <h2>Your Check-in</h2>
+            <div class="stats">
+                <div class="stat"><span>Mood</span><strong>{{ latest["mood"] }}/5</strong></div>
+                <div class="stat"><span>Stress</span><strong>{{ latest["stress"] }}/5</strong></div>
+                <div class="stat"><span>Date</span><strong style="font-size:20px">{{ latest["checkin_date"] }}</strong></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>My Response</h2>
+            <div class="response-box">{{ latest["advice"] }}</div>
+        </section>
+
+        <section class="card">
+            <h2>Suggested Solution</h2>
+            <div class="solution-box">{{ latest["solution"] }}</div>
+        </section>
+
+        <a class="secondary-btn" href="{{ url_for('daily_mode') }}">Open Daily Solution →</a>
+    {% else %}
+        <section class="card">
+            <p>No check-in is available yet. Please complete your first daily check-in.</p>
+            <br>
+            <a class="primary-btn" href="{{ url_for('dashboard') }}">Go to Check-in</a>
+        </section>
+    {% endif %}
+</main>
+</body>
+</html>
